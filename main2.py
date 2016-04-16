@@ -60,14 +60,19 @@ SCREEN_WIDTH = 640
 SCREEN_HEIGHT = 800
 IMG_WIDTH = 640
 IMG_HEIGHT = 480
+DISPLAY_WIDTH = 640
+DISPLAY_HEIGHT = 600
 USEREVENT = 0
-
+STEPY = 0.2
+STEPY_THRESHOLD = 10
 ########################     Global Variables     ########################
 screen = None
 buffer_surface = None
 cur_event_idx = 0
 cur_img_idx = 0
 events_arr = []
+posX = 0
+posY = 0
 # need_update_display_count
 need_update_display_count = 0
 
@@ -126,7 +131,7 @@ def addImageToSurfaceMiddleAlign(surface, starting_y):
 
 def updateDisplay(surface):
     screen.fill((0,0,0))
-    screen.blit(surface,(0,0))
+    screen.blit(surface.subsurface(posX,posY,DISPLAY_WIDTH,DISPLAY_HEIGHT),(0,0))
     pygame.display.flip() # update the display
 
 
@@ -154,9 +159,29 @@ def JS_Left_callback(channel):
 
 def JS_Top_callback(channel):
     print "falling edge detected on Joystick Top"
+    global posY
+    step_counter = 0
+    while GPIO.input(channel) == GPIO.LOW:
+        print "Top is low..."
+        step_counter += STEPY
+        if step_counter >= STEPY_THRESHOLD:
+            step_counter = 0
+            posY -= STEPY_THRESHOLD
+            print "posY now is %d" % posY
+            updateDisplayWithUrl()
 
 def JS_Bottom_callback(channel):
     print "falling edge detected on Joystick Bottom"
+    global posY
+    step_counter = 0
+    while GPIO.input(channel) == GPIO.LOW:
+        print "Bottom is low..."
+        step_counter += STEPY
+        if step_counter >= STEPY_THRESHOLD:
+            step_counter = 0
+            posY += STEPY_THRESHOLD
+            print "posY now is %d" % posY
+            updateDisplayWithUrl()
 
 def JS_Right_callback(channel):
     print "falling edge detected on Joystick Right"
