@@ -19,11 +19,12 @@ IMG_HEIGHT = 480
 USEREVENT = 0
 
 ########################     Global Variables     ########################
-screen = 0
+screen
 cur_event_idx = 0
 cur_img_idx = 0
 events_arr = []
-exit_count = 0
+# need_update_display_count
+need_update_display_count = 0
 
 def updateDisplayWithUrl():
     global screen
@@ -41,48 +42,37 @@ def updateDisplayWithUrl():
     img = pygame.transform.scale(img, (IMG_WIDTH, IMG_HEIGHT))
     screen.blit(img,(0,0))
     pygame.display.flip() # update the display
+    need_update_display_count -= 1
 
 def JS_Left_callback(channel):
     print "falling edge detected on Joystick Left"
-    global exit_count
     global cur_event_idx
     global events_arr
-    exit_count = 0
     length = len(events_arr)
     cur_event_idx += length - 1
     cur_event_idx %= length
-    updateDisplayWithUrl()
+    need_update_display_count += 1
 
 def JS_Top_callback(channel):
     print "falling edge detected on Joystick Top"
-    global exit_count
-    exit_count = 0
 
 def JS_Bottom_callback(channel):
     print "falling edge detected on Joystick Bottom"
-    global exit_count
-    exit_count = 0
 
 def JS_Right_callback(channel):
     print "falling edge detected on Joystick Right"
-    global exit_count
     global cur_event_idx
     global events_arr
-    exit_count = 0
     length = len(events_arr)
     cur_event_idx += 1
     cur_event_idx %= length
-    updateDisplayWithUrl()
+    need_update_display_count += 1
 
 def BT_White_callback(channel):
     print "falling edge detected on Button White"
-    global exit_count
-    exit_count = 0
 
 def BT_Red_callback(channel):
     print "falling edge detected on Button Red"
-    global exit_count
-    exit_count += 1
 
 if __name__ == __main__:
 
@@ -129,8 +119,8 @@ if __name__ == __main__:
         
     	# wait for 3 continuous red button pressed to exit the program.
         while True:
-            if exit_count >= 3:
-                break
+            if need_update_display_count > 0:
+                updateDisplayWithUrl()
 
     except KeyboardInterrupt:
         # do nothing
