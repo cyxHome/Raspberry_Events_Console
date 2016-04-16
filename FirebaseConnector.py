@@ -14,4 +14,8 @@ def packEventsToEventsData(events_arr, firebase_url):
 			tmp = EventData(idx)
 			idx += 1
 			tmp.setArrayOfImages(event["imageOfEvent"])
+			tmp.setTitle(event["nameOfEvent"])
+			tmp.setDescription(event["introOfEvent"])
+			tmp.setTime(event["startingTime"])
+			tmp.setLocation(event["locationOfEvent"])
 			events_arr.append(tmp)
