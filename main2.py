@@ -129,23 +129,25 @@ def addImageToSurfaceMiddleAlign(surface, starting_y):
     surface.blit(img,((SCREEN_WIDTH - IMG_WIDTH) / 2, starting_y))
     return starting_y + IMG_HEIGHT
 
-def updateDisplay(surface):
+def updateDisplay():
+    global buffer_surface
     screen.fill((0,0,0))
-    screen.blit(surface.subsurface(posX,posY,DISPLAY_WIDTH,DISPLAY_HEIGHT),(0,0))
+    screen.blit(buffer_surface.subsurface(posX,posY,DISPLAY_WIDTH,DISPLAY_HEIGHT),(0,0))
     pygame.display.flip() # update the display
 
 
-def updateDisplayBuffer(surface):
+def updateDisplayBuffer():
+    global buffer_surface
     global events_arr
     global cur_event_idx
     print "cur_event_idx", cur_event_idx
     print "cur_img_idx", cur_img_idx
-    surface.fill((0,0,0))
-    next_y = addTitleToSurfaceMiddleAlign(surface, events_arr[cur_event_idx].getTitle(), 0)
-    next_y = addTimeAndLocationToSurfaceMiddleAlign(surface, events_arr[cur_event_idx].getTime(),
+    buffer_surface.fill((0,0,0))
+    next_y = addTitleToSurfaceMiddleAlign(buffer_surface, events_arr[cur_event_idx].getTitle(), 0)
+    next_y = addTimeAndLocationToSurfaceMiddleAlign(buffer_surface, events_arr[cur_event_idx].getTime(),
                                                     events_arr[cur_event_idx].getLocation(), next_y)
-    next_y = addImageToSurfaceMiddleAlign(surface, next_y)
-    addDescriptionToSurfaceMiddleAlign(surface, events_arr[cur_event_idx].getDescription(), next_y)
+    next_y = addImageToSurfaceMiddleAlign(buffer_surface, next_y)
+    addDescriptionToSurfaceMiddleAlign(buffer_surface, events_arr[cur_event_idx].getDescription(), next_y)
 
 def JS_Left_callback(channel):
     print "falling edge detected on Joystick Left"
@@ -168,7 +170,7 @@ def JS_Top_callback(channel):
             step_counter = 0
             posY -= STEPY_THRESHOLD
             print "posY now is %d" % posY
-            updateDisplayWithUrl()
+            updateDisplay()
 
 def JS_Bottom_callback(channel):
     print "falling edge detected on Joystick Bottom"
@@ -181,7 +183,7 @@ def JS_Bottom_callback(channel):
             step_counter = 0
             posY += STEPY_THRESHOLD
             print "posY now is %d" % posY
-            updateDisplayWithUrl()
+            updateDisplay()
 
 def JS_Right_callback(channel):
     print "falling edge detected on Joystick Right"
