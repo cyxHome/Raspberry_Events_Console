@@ -38,7 +38,7 @@ class EventData:
 	def getTime(self):
 		return self.time
 
-	def getLocation(serf):
+	def getLocation(self):
 		return self.location
 
 	## Helpers ##

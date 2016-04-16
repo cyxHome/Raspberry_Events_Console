@@ -10,12 +10,54 @@ import FirebaseConnector
 import RPi.GPIO as GPIO
 import subprocess
 import requests
+import textwrap
+
+# http://pygame.org/wiki/TextWrapping?parent=
+from itertools import chain
+ 
+def truncline(text, font, maxwidth):
+    real=len(text)       
+    stext=text           
+    l=font.size(text)[0]
+    cut=0
+    a=0                  
+    done=1
+    old = None
+    while l > maxwidth:
+        a=a+1
+        n=text.rsplit(None, a)[0]
+        if stext == n:
+            cut += 1
+            stext= n[:-cut]
+        else:
+            stext = n
+        l=font.size(stext)[0]
+        real=len(stext)               
+        done=0                        
+    return real, done, stext             
+        
+def wrapline(text, font, maxwidth): 
+    done=0                      
+    wrapped=[]                  
+                               
+    while not done:             
+        nl, done, stext=truncline(text, font, maxwidth) 
+        wrapped.append(stext.strip())                  
+        text=text[nl:]                                 
+    return wrapped
+ 
+ 
+def wrap_multi_line(text, font, maxwidth):
+    """ returns text taking new lines into account.
+    """
+    lines = chain(*(wrapline(line, font, maxwidth) for line in text.splitlines()))
+    return list(lines)
 
 
 ########################     Constants     ########################
 FIREBASE_ROOT_REF = 'https://event-finder-test.firebaseio.com'
 SCREEN_WIDTH = 640
-SCREEN_HEIGHT = 2000
+SCREEN_HEIGHT = 800
 IMG_WIDTH = 640
 IMG_HEIGHT = 480
 USEREVENT = 0
@@ -33,11 +75,18 @@ def addTextToSurfaceMiddleAlign(surface, text, starting_y, font_size):
     """ Adding title into the buffer surface.
     Return the ending y location of the text box. 
     """
-    font = pygame.font.Font("Arial", font_size)
-    text = font.render(text, True, BLACK)
-    text_width = text.get_rect().width
-    surface.blit(text, [(SCREEN_WIDTH - text_width) / 2, starting_y])
-    return starting_y + text.get_rect().height
+    font = pygame.font.SysFont("Arial", font_size)
+    lines = wrap_multi_line(text, font, SCREEN_WIDTH)
+    print lines
+    print "split into %s lines" % str(len(lines))
+    tmp = starting_y
+    for line in lines:
+        print tmp
+        text = font.render(line, True, [0,255,255])
+        text_width = text.get_rect().width
+        surface.blit(text, [(SCREEN_WIDTH - text_width) / 2, tmp])
+        tmp += text.get_rect().height
+    return tmp
 
 def addTitleToSurfaceMiddleAlign(surface, title, starting_y):
     """ Adding title into the buffer surface.
@@ -49,7 +98,8 @@ def addTimeAndLocationToSurfaceMiddleAlign(surface, time, location, starting_y):
     """ Adding time and location into the buffer surface.
     Return the ending y location of the text box. 
     """
-    return addTextToSurfaceMiddleAlign(surface, time.join(" ").join(location), starting_y, 18)
+    tmp = addTextToSurfaceMiddleAlign(surface, location, starting_y, 18)
+    return addTextToSurfaceMiddleAlign(surface, time, tmp, 18)
 
 def addDescriptionToSurfaceMiddleAlign(surface, description, starting_y):
     """ Adding description into the buffer surface.
@@ -75,35 +125,28 @@ def addImageToSurfaceMiddleAlign(surface, starting_y):
     return starting_y + IMG_HEIGHT
 
 def updateDisplay(surface):
+    screen.fill((0,0,0))
     screen.blit(surface,(0,0))
     pygame.display.flip() # update the display
 
 
 def updateDisplayBuffer(surface):
-    # global screen
-    # global events_arr
-    # global cur_event_idx
-    # global cur_img_idx
+    global events_arr
+    global cur_event_idx
     print "cur_event_idx", cur_event_idx
     print "cur_img_idx", cur_img_idx
-    next_y = addTitleToSurfaceMiddleAlign(surface, "Title", 0)
-    next_y = addTimeAndLocationToSurfaceMiddleAlign(surface, "Time", "Location", next_y)
+    surface.fill((0,0,0))
+    next_y = addTitleToSurfaceMiddleAlign(surface, events_arr[cur_event_idx].getTitle(), 0)
+    next_y = addTimeAndLocationToSurfaceMiddleAlign(surface, events_arr[cur_event_idx].getTime(),
+                                                    events_arr[cur_event_idx].getLocation(), next_y)
     next_y = addImageToSurfaceMiddleAlign(surface, next_y)
-    addDescriptionToSurfaceMiddleAlign(surface, "Description", next_y)
-    # cur_events_images_arr = events_arr[cur_event_idx].getImageArray()
-    # img_str = cur_events_images_arr[cur_img_idx]
-    # print "img_str", img_str
-    # file = urllib2.urlopen(img_str).read()
-    # file = cStringIO.StringIO(file)
-    # img = pygame.image.load(file)
-    # img = pygame.transform.scale(img, (IMG_WIDTH, IMG_HEIGHT))
-    # screen.blit(img,(0,0))
-    # pygame.display.flip() # update the display
+    addDescriptionToSurfaceMiddleAlign(surface, events_arr[cur_event_idx].getDescription(), next_y)
 
 def JS_Left_callback(channel):
     print "falling edge detected on Joystick Left"
     global cur_event_idx
     global events_arr
+    global need_update_display_count
     length = len(events_arr)
     cur_event_idx += length - 1
     cur_event_idx %= length
@@ -119,6 +162,7 @@ def JS_Right_callback(channel):
     print "falling edge detected on Joystick Right"
     global cur_event_idx
     global events_arr
+    global need_update_display_count
     length = len(events_arr)
     cur_event_idx += 1
     cur_event_idx %= length
@@ -130,7 +174,7 @@ def BT_White_callback(channel):
 def BT_Red_callback(channel):
     print "falling edge detected on Button Red"
 
-if __name__ == __main__:
+if __name__ == '__main__':
 
     print "Welcome to use raspberry pi event visualizor"
     print "-------------------------------------------------------"
@@ -165,21 +209,21 @@ if __name__ == __main__:
         pygame.init()
         size=(SCREEN_WIDTH, SCREEN_HEIGHT)
         screen = pygame.display.set_mode(size)
-        buffer_surface = pygame.Surface(SCREEN_WIDTH, SCREEN_HEIGHT)
+        buffer_surface = pygame.Surface(size)
     	# c = pygame.time.Clock() # create a clock object for timing
     	# pygame.time.set_timer(USEREVENT+1, 1000)  #1 second
     	# pygame.time.set_timer(USEREVENT+2, 5000)  #5 seconds
         FirebaseConnector.packEventsToEventsData(events_arr, FIREBASE_ROOT_REF)
         print events_arr
 
-        updateDisplayBuffer()
-        updateDisplay()
+        updateDisplayBuffer(buffer_surface)
+        updateDisplay(buffer_surface)
         
     	# wait for 3 continuous red button pressed to exit the program.
         while True:
             if need_update_display_count > 0:
-                updateDisplayBuffer()
-                updateDisplay()
+                updateDisplayBuffer(buffer_surface)
+                updateDisplay(buffer_surface)
                 need_update_display_count -= 1
 
     except KeyboardInterrupt:

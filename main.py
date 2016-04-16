@@ -17,14 +17,37 @@ FIREBASE_ROOT_REF = 'https://event-finder-test.firebaseio.com'
 IMG_WIDTH = 640
 IMG_HEIGHT = 480
 USEREVENT = 0
-
+STEPY = 0.2
+STEPY_THRESHOLD = 10
 ########################     Global Variables     ########################
 screen = None
+las_event_idx = -1
+las_img_idx = -1
 cur_event_idx = 0
 cur_img_idx = 0
 events_arr = []
+posX = 0
+posY = 0
+cur_img = 0
 # need_update_display_count
 need_update_display_count = 0
+
+def fetchImgWithUrl():
+    global cur_img
+    global las_event_idx
+    global las_img_idx
+    global cur_event_idx
+    global cur_img_idx
+    print "img changed, now calling fetchImgWithUrl method"
+    cur_events_images_arr = events_arr[cur_event_idx].getImageArray()
+    img_str = cur_events_images_arr[cur_img_idx]
+    print "img_str", img_str
+    file = urllib2.urlopen(img_str).read()
+    file = cStringIO.StringIO(file)
+    cur_img = pygame.image.load(file)
+    cur_img = pygame.transform.scale(cur_img, (IMG_WIDTH, IMG_HEIGHT))
+    las_event_idx = cur_event_idx
+    las_img_idx = cur_img_idx
 
 def updateDisplayWithUrl():
     global screen
@@ -32,16 +55,14 @@ def updateDisplayWithUrl():
     global cur_event_idx
     global cur_img_idx
     global events_arr
+    global posX
+    global posY
+    global cur_img
     print "cur_event_idx", cur_event_idx
     print "cur_img_idx", cur_img_idx
-    cur_events_images_arr = events_arr[cur_event_idx].getImageArray()
-    img_str = cur_events_images_arr[cur_img_idx]
-    print "img_str", img_str
-    file = urllib2.urlopen(img_str).read()
-    file = cStringIO.StringIO(file)
-    img = pygame.image.load(file)
-    img = pygame.transform.scale(img, (IMG_WIDTH, IMG_HEIGHT))
-    screen.blit(img,(0,0))
+    if cur_event_idx != las_event_idx or cur_img_idx != las_img_idx:
+        fetchImgWithUrl()
+    screen.blit(cur_img,(posX,posY))
     pygame.display.flip() # update the display
 
 def JS_Left_callback(channel):
@@ -50,25 +71,53 @@ def JS_Left_callback(channel):
     global events_arr
     global events_arr
     global need_update_display_count
+    global posX
+    global posY
     length = len(events_arr)
     cur_event_idx += length - 1
     cur_event_idx %= length
+    posX = 0
+    posY = 0
     need_update_display_count += 1
 
 def JS_Top_callback(channel):
+    global posY
+    step_counter = 0
     print "falling edge detected on Joystick Top"
+    while GPIO.input(channel) == GPIO.LOW:
+        print "Top is low..."
+        step_counter += STEPY
+        if step_counter >= STEPY_THRESHOLD:
+            step_counter = 0
+            posY -= STEPY_THRESHOLD
+            print "posY now is %d" % posY
+            updateDisplayWithUrl()
 
 def JS_Bottom_callback(channel):
+    global posY
+    step_counter = 0
     print "falling edge detected on Joystick Bottom"
+    while GPIO.input(channel) == GPIO.LOW:
+        print "Bottom is low..."
+        step_counter += STEPY
+        if step_counter >= STEPY_THRESHOLD:
+            step_counter = 0
+            posY += STEPY_THRESHOLD
+            print "posY now is %d" % posY
+            updateDisplayWithUrl()
 
 def JS_Right_callback(channel):
     print "falling edge detected on Joystick Right"
     global cur_event_idx
     global events_arr
     global need_update_display_count
+    global posX
+    global posY
     length = len(events_arr)
     cur_event_idx += 1
     cur_event_idx %= length
+    posX = 0
+    posY = 0
     need_update_display_count += 1
 
 def BT_White_callback(channel):
@@ -119,7 +168,7 @@ if __name__ == '__main__':
         print events_arr
 
         updateDisplayWithUrl()
-        
+
     	# wait for 3 continuous red button pressed to exit the program.
         while True:
             if need_update_display_count > 0:
