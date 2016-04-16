@@ -19,7 +19,7 @@ IMG_HEIGHT = 480
 USEREVENT = 0
 
 ########################     Global Variables     ########################
-screen
+screen = None
 cur_event_idx = 0
 cur_img_idx = 0
 events_arr = []
@@ -31,6 +31,7 @@ def updateDisplayWithUrl():
     global events_arr
     global cur_event_idx
     global cur_img_idx
+    global events_arr
     print "cur_event_idx", cur_event_idx
     print "cur_img_idx", cur_img_idx
     cur_events_images_arr = events_arr[cur_event_idx].getImageArray()
@@ -42,12 +43,13 @@ def updateDisplayWithUrl():
     img = pygame.transform.scale(img, (IMG_WIDTH, IMG_HEIGHT))
     screen.blit(img,(0,0))
     pygame.display.flip() # update the display
-    need_update_display_count -= 1
 
 def JS_Left_callback(channel):
     print "falling edge detected on Joystick Left"
     global cur_event_idx
     global events_arr
+    global events_arr
+    global need_update_display_count
     length = len(events_arr)
     cur_event_idx += length - 1
     cur_event_idx %= length
@@ -63,6 +65,7 @@ def JS_Right_callback(channel):
     print "falling edge detected on Joystick Right"
     global cur_event_idx
     global events_arr
+    global need_update_display_count
     length = len(events_arr)
     cur_event_idx += 1
     cur_event_idx %= length
@@ -74,7 +77,7 @@ def BT_White_callback(channel):
 def BT_Red_callback(channel):
     print "falling edge detected on Button Red"
 
-if __name__ == __main__:
+if __name__ == '__main__':
 
     print "Welcome to use raspberry pi event visualizor"
     print "-------------------------------------------------------"
@@ -120,7 +123,10 @@ if __name__ == __main__:
     	# wait for 3 continuous red button pressed to exit the program.
         while True:
             if need_update_display_count > 0:
+                print "update with cur_event_idx = %s" % cur_event_idx
                 updateDisplayWithUrl()
+                need_update_display_count -= 1
+
 
     except KeyboardInterrupt:
         # do nothing
