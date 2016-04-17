@@ -61,12 +61,14 @@ SCREEN_HEIGHT = 800
 IMG_WIDTH = 640
 IMG_HEIGHT = 480
 DISPLAY_WIDTH = 640
-DISPLAY_HEIGHT = 600
+DISPLAY_HEIGHT = 500
 USEREVENT = 0
-STEPY = 0.2
+STEPY = 1
 STEPY_THRESHOLD = 10
 ########################     Global Variables     ########################
 screen = None
+up = True
+step_counter = 0
 buffer_surface = None
 cur_event_idx = 0
 cur_img_idx = 0
@@ -131,6 +133,8 @@ def addImageToSurfaceMiddleAlign(surface, starting_y):
 
 def updateDisplay():
     global buffer_surface
+    global posX
+    global posY
     screen.fill((0,0,0))
     if posY < 0:
         posY = 0
@@ -166,28 +170,22 @@ def JS_Left_callback(channel):
 def JS_Top_callback(channel):
     print "falling edge detected on Joystick Top"
     global posY
-    step_counter = 0
+    global step_counter
+    global up
+    up = True
     while GPIO.input(channel) == GPIO.LOW:
         print "Top is low..."
-        step_counter += STEPY
-        if step_counter >= STEPY_THRESHOLD:
-            step_counter = 0
-            posY -= STEPY_THRESHOLD
-            print "posY now is %d" % posY
-            updateDisplay()
+        step_counter += STEPY 
 
 def JS_Bottom_callback(channel):
     print "falling edge detected on Joystick Bottom"
     global posY
-    step_counter = 0
+    global step_counter
+    global up
+    up = False
     while GPIO.input(channel) == GPIO.LOW:
         print "Bottom is low..."
         step_counter += STEPY
-        if step_counter >= STEPY_THRESHOLD:
-            step_counter = 0
-            posY += STEPY_THRESHOLD
-            print "posY now is %d" % posY
-            updateDisplay()
 
 def JS_Right_callback(channel):
     print "falling edge detected on Joystick Right"
@@ -252,7 +250,18 @@ if __name__ == '__main__':
 
     	# wait for 3 continuous red button pressed to exit the program.
         while True:
+            if step_counter >= STEPY_THRESHOLD:
+                step_counter = 0
+                if up:
+                    posY -= STEPY_THRESHOLD
+                else:
+                    posY += STEPY_THRESHOLD
+                print "posY now is %d" % posY
+                updateDisplay()
+            #print "this is while loop"
             if need_update_display_count > 0:
+                posX = 0
+                posY = 100
                 updateDisplayBuffer()
                 updateDisplay()
                 need_update_display_count -= 1
