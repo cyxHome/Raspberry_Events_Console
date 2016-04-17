@@ -132,7 +132,7 @@ def addImageToSurfaceMiddleAlign(surface, starting_y):
 def updateDisplay():
     global buffer_surface
     screen.fill((0,0,0))
-    screen.blit(buffer_surface.subsurface(posX+50,posY,DISPLAY_WIDTH,DISPLAY_HEIGHT),(0,0))
+    screen.blit(buffer_surface.subsurface(posX,posY+50,DISPLAY_WIDTH,DISPLAY_HEIGHT),(0,0))
     pygame.display.flip() # update the display
 
 
