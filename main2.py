@@ -132,7 +132,7 @@ def addImageToSurfaceMiddleAlign(surface, starting_y):
 def updateDisplay():
     global buffer_surface
     screen.fill((0,0,0))
-    screen.blit(buffer_surface.subsurface(posX,posY,DISPLAY_WIDTH,DISPLAY_HEIGHT),(0,0))
+    screen.blit(buffer_surface.subsurface(posX+50,posY,DISPLAY_WIDTH,DISPLAY_HEIGHT),(0,0))
     pygame.display.flip() # update the display
 
 
@@ -243,14 +243,14 @@ if __name__ == '__main__':
         FirebaseConnector.packEventsToEventsData(events_arr, FIREBASE_ROOT_REF)
         print events_arr
 
-        updateDisplayBuffer(buffer_surface)
-        updateDisplay(buffer_surface)
+        updateDisplayBuffer()
+        updateDisplay()
         
     	# wait for 3 continuous red button pressed to exit the program.
         while True:
             if need_update_display_count > 0:
-                updateDisplayBuffer(buffer_surface)
-                updateDisplay(buffer_surface)
+                updateDisplayBuffer()
+                updateDisplay()
                 need_update_display_count -= 1
 
     except KeyboardInterrupt:
