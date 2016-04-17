@@ -72,7 +72,7 @@ cur_event_idx = 0
 cur_img_idx = 0
 events_arr = []
 posX = 0
-posY = 0
+posY = 100
 # need_update_display_count
 need_update_display_count = 0
 
@@ -132,7 +132,11 @@ def addImageToSurfaceMiddleAlign(surface, starting_y):
 def updateDisplay():
     global buffer_surface
     screen.fill((0,0,0))
-    screen.blit(buffer_surface.subsurface(posX+50,posY,DISPLAY_WIDTH,DISPLAY_HEIGHT),(0,0))
+    if posY < 0:
+        posY = 0
+    if posY > SCREEN_HEIGHT - DISPLAY_HEIGHT:
+        posY = SCREEN_HEIGHT - DISPLAY_HEIGHT
+    screen.blit(buffer_surface.subsurface(posX,posY,DISPLAY_WIDTH,DISPLAY_HEIGHT),(0,0))
     pygame.display.flip() # update the display
 
 
