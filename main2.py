@@ -14,13 +14,13 @@ import textwrap
 
 # http://pygame.org/wiki/TextWrapping?parent=
 from itertools import chain
- 
+
 def truncline(text, font, maxwidth):
-    real=len(text)       
-    stext=text           
+    real=len(text)
+    stext=text
     l=font.size(text)[0]
     cut=0
-    a=0                  
+    a=0
     done=1
     old = None
     while l > maxwidth:
@@ -32,21 +32,21 @@ def truncline(text, font, maxwidth):
         else:
             stext = n
         l=font.size(stext)[0]
-        real=len(stext)               
-        done=0                        
-    return real, done, stext             
-        
-def wrapline(text, font, maxwidth): 
-    done=0                      
-    wrapped=[]                  
-                               
-    while not done:             
-        nl, done, stext=truncline(text, font, maxwidth) 
-        wrapped.append(stext.strip())                  
-        text=text[nl:]                                 
+        real=len(stext)
+        done=0
+    return real, done, stext
+
+def wrapline(text, font, maxwidth):
+    done=0
+    wrapped=[]
+
+    while not done:
+        nl, done, stext=truncline(text, font, maxwidth)
+        wrapped.append(stext.strip())
+        text=text[nl:]
     return wrapped
- 
- 
+
+
 def wrap_multi_line(text, font, maxwidth):
     """ returns text taking new lines into account.
     """
@@ -72,13 +72,13 @@ cur_event_idx = 0
 cur_img_idx = 0
 events_arr = []
 posX = 0
-posY = 0
+posY = 100
 # need_update_display_count
 need_update_display_count = 0
 
 def addTextToSurfaceMiddleAlign(surface, text, starting_y, font_size):
     """ Adding title into the buffer surface.
-    Return the ending y location of the text box. 
+    Return the ending y location of the text box.
     """
     font = pygame.font.SysFont("Arial", font_size)
     lines = wrap_multi_line(text, font, SCREEN_WIDTH)
@@ -95,26 +95,26 @@ def addTextToSurfaceMiddleAlign(surface, text, starting_y, font_size):
 
 def addTitleToSurfaceMiddleAlign(surface, title, starting_y):
     """ Adding title into the buffer surface.
-    Return the ending y location of the text box. 
+    Return the ending y location of the text box.
     """
     return addTextToSurfaceMiddleAlign(surface, title, starting_y, 25)
 
 def addTimeAndLocationToSurfaceMiddleAlign(surface, time, location, starting_y):
     """ Adding time and location into the buffer surface.
-    Return the ending y location of the text box. 
+    Return the ending y location of the text box.
     """
     tmp = addTextToSurfaceMiddleAlign(surface, location, starting_y, 18)
     return addTextToSurfaceMiddleAlign(surface, time, tmp, 18)
 
 def addDescriptionToSurfaceMiddleAlign(surface, description, starting_y):
     """ Adding description into the buffer surface.
-    Return the ending y location of the text box. 
+    Return the ending y location of the text box.
     """
     return addTextToSurfaceMiddleAlign(surface, description, starting_y, 20)
 
 def addImageToSurfaceMiddleAlign(surface, starting_y):
     """ Adding time and location into the buffer surface.
-    Return the ending y location of the text box. 
+    Return the ending y location of the text box.
     """
     global events_arr
     global cur_event_idx
@@ -132,7 +132,11 @@ def addImageToSurfaceMiddleAlign(surface, starting_y):
 def updateDisplay():
     global buffer_surface
     screen.fill((0,0,0))
-    screen.blit(buffer_surface.subsurface(posX,posY+50,DISPLAY_WIDTH,DISPLAY_HEIGHT),(0,0))
+    if posY < 0:
+        posY = 0
+    if posY > SCREEN_HEIGHT - DISPLAY_HEIGHT:
+        posY = SCREEN_HEIGHT - DISPLAY_HEIGHT
+    screen.blit(buffer_surface.subsurface(posX,posY,DISPLAY_WIDTH,DISPLAY_HEIGHT),(0,0))
     pygame.display.flip() # update the display
 
 
@@ -245,7 +249,7 @@ if __name__ == '__main__':
 
         updateDisplayBuffer()
         updateDisplay()
-        
+
     	# wait for 3 continuous red button pressed to exit the program.
         while True:
             if need_update_display_count > 0:
