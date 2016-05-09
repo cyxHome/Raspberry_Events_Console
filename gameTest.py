@@ -290,13 +290,13 @@ if __name__ == '__main__':
             if is_game_mode and console is not None:
                 print "move smile " + str(direction)    
                 if direction == 0:
-                    console.move_up_event()
+                    console.move_up_event(direction)
                 elif direction == 1:
-                    console.move_down_event()
+                    console.move_down_event(direction)
                 elif direction == 2:
-                    console.move_left_event()
+                    console.move_left_event(direction)
                 elif direction == 3:
-                    console.move_right_event()
+                    console.move_right_event(direction)
                 console.update_all()
             else:
                 if step_counter >= STEPY_THRESHOLD:

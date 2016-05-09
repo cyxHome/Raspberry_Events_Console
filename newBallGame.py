@@ -33,7 +33,7 @@ class Ball():
 		self.pygame = pygame
 		self.gameDisplay = gameDisplay
 		rand_num = random.randint(1, 3)
-		self.image = self.pygame.image.load("./assets/stone" + rand_num + ".png") # player.png from https://textfac.es
+		self.image = self.pygame.image.load("./assets/stone" + str(rand_num) + ".png") # player.png from https://textfac.es
 
 	def update(self):
 		# if the ball is past the sreen, it reverses direction
@@ -87,9 +87,13 @@ class Console():
 		self.pygame = pygame
 		self.bg_surface = bg_surface
 		self.gameDisplay = gameDisplay
-		PLAYER = self.pygame.image.load("./assets/player.png") # player.png from https://textfac.es
-        PLAYER_SIZE = PLAYER.get_rect().size # creates rectangle around image and returns (width, height)
+		PLAYER = [self.pygame.image.load("./assets/player0.png"), # player.png from https://textfac.es
+                          self.pygame.image.load("./assets/player1.png"),
+                          self.pygame.image.load("./assets/player2.png"),
+                          self.pygame.image.load("./assets/player3.png")]
+                PLAYER_SIZE = PLAYER[0].get_rect().size # creates rectangle around image and returns (width, height)
 
+                
 		self.mouseX = gameDisplay.get_width()
 		self.mouseY = gameDisplay.get_height()
 		# mouseXnew = 0
@@ -102,22 +106,27 @@ class Console():
 		
 		self.done = False
 		self.clock = self.pygame.time.Clock()
+		self.direction = 0
 		
-	def move_up_event(self):
+	def move_up_event(self, direction):
 		self.mouseX = self.mouseX
 		self.mouseY = self.mouseY - MOUSE_SPEED
+		self.direction = direction
 	
-	def move_down_event(self):
+	def move_down_event(self, direction):
 		self.mouseX = self.mouseX
 		self.mouseY = self.mouseY + MOUSE_SPEED
+		self.direction = direction
 	
-	def move_left_event(self):
+	def move_left_event(self, direction):
 		self.mouseX = self.mouseX - MOUSE_SPEED
 		self.mouseY = self.mouseY
+		self.direction = direction
 	
-	def move_right_event(self):
+	def move_right_event(self, direction):
 		self.mouseX = self.mouseX + MOUSE_SPEED
 		self.mouseY = self.mouseY
+		self.direction = direction
 
 	def update_all(self):
 		self.mouseXchange = self.mouseX - PLAYER_SIZE[0]/2
@@ -149,7 +158,7 @@ class Console():
 
 
 	def playerPosUpdate(self,x,y):
-		self.gameDisplay.blit(PLAYER, (x,y))
+		self.gameDisplay.blit(PLAYER[self.direction], (x,y))
 
 	def gameOverText(self):
 		font = pygame.font.Font(None, 100)
@@ -173,7 +182,7 @@ class Console():
 				# 	mouseYchange = mouseYnew - mouseY - PLAYER_SIZE[1]/2
 #-----Global Methods-----
 def randSpdCalc():
-	speed = random.randint(7,17)
+	speed = random.randint(1,4)
 	if random.randint(1,2) == 1:
 		speed *= -1
 	return speed
