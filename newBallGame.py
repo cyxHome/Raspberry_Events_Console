@@ -1,9 +1,11 @@
 import pygame
 import random
 import math
+import random
 from time import sleep
 
-SMILE = None
+PLAYER = None
+STONE = None
 
 #-----Constants-----
 
@@ -15,7 +17,7 @@ BLACK = (0,0,0)
 WHITE = (255,255,255)
 RED = (255, 0, 0)
 
-SMILE_SIZE = None
+PLAYER_SIZE = None
 BALL_RADIUS = 30
 
 MOUSE_SPEED = 5
@@ -30,6 +32,8 @@ class Ball():
 		self.speedy = randSpdCalc()
 		self.pygame = pygame
 		self.gameDisplay = gameDisplay
+		rand_num = random.randint(1, 3)
+		self.image = self.pygame.image.load("./assets/stone" + rand_num + ".png") # player.png from https://textfac.es
 
 	def update(self):
 		# if the ball is past the sreen, it reverses direction
@@ -41,13 +45,8 @@ class Ball():
 		self.posx += self.speedx
 		self.posy += self.speedy
 		#drawing ball after update
-		self.pygame.draw.circle(self.gameDisplay, WHITE, (self.posx, self.posy), BALL_RADIUS)
-
-	def removeFromScreen(self):
-		# moves ball off screen
-		self.posx = DISPLAY_WIDTH + 100
-		self.posy = DISPLAY_HEIGHT + 100
-		self.pygame.draw.circle(self.gameDisplay, WHITE, (self.posx, self.posy), BALL_RADIUS)
+		self.gameDisplay.blit(self.image, (self.posx,self.posy))
+		#self.pygame.draw.circle(self.gameDisplay, WHITE, (self.posx, self.posy), BALL_RADIUS)
 
 	def getPos(self):
 		return [self.posx, self.posy]
@@ -82,14 +81,14 @@ class Time():
 
 class Console():
 	def __init__(self, pygame, bg_surface, gameDisplay):
-		global SMILE
-		global SMILE_SIZE
+		global PLAYER
+		global PLAYER_SIZE
 
 		self.pygame = pygame
 		self.bg_surface = bg_surface
 		self.gameDisplay = gameDisplay
-		SMILE = self.pygame.image.load("./assets/smile.png") # smile.png from https://textfac.es
-                SMILE_SIZE = SMILE.get_rect().size # creates rectangle around image and returns (width, height)
+		PLAYER = self.pygame.image.load("./assets/player.png") # player.png from https://textfac.es
+        PLAYER_SIZE = PLAYER.get_rect().size # creates rectangle around image and returns (width, height)
 
 		self.mouseX = gameDisplay.get_width()
 		self.mouseY = gameDisplay.get_height()
@@ -121,15 +120,15 @@ class Console():
 		self.mouseY = self.mouseY
 
 	def update_all(self):
-		self.mouseXchange = self.mouseX - SMILE_SIZE[0]/2
-		self.mouseYchange = self.mouseY - SMILE_SIZE[1]/2
+		self.mouseXchange = self.mouseX - PLAYER_SIZE[0]/2
+		self.mouseYchange = self.mouseY - PLAYER_SIZE[1]/2
 		self.timeObject.update()
 		self.time = self.timeObject.getTime()
 
 		self.ballData.addBall(self.time)
 
 		self.gameDisplay.blit(self.bg_surface, (0,0))
-		self.smilePosUpdate(self.mouseXchange, self.mouseYchange)
+		self.playerPosUpdate(self.mouseXchange, self.mouseYchange)
 		self.displayScoreText(self.time, "current")
 			
 		for ball in self.ballData.getBallList():
@@ -149,8 +148,8 @@ class Console():
 
 
 
-	def smilePosUpdate(self,x,y):
-		self.gameDisplay.blit(SMILE, (x,y))
+	def playerPosUpdate(self,x,y):
+		self.gameDisplay.blit(PLAYER, (x,y))
 
 	def gameOverText(self):
 		font = pygame.font.Font(None, 100)
@@ -170,8 +169,8 @@ class Console():
 
 				# elif event.type == pygame.MOUSEMOTION:
 				# 	(mouseXnew, mouseYnew) = pygame.mouse.get_pos()
-				# 	mouseXchange = mouseXnew - mouseX - SMILE_SIZE[0]/2
-				# 	mouseYchange = mouseYnew - mouseY - SMILE_SIZE[1]/2
+				# 	mouseXchange = mouseXnew - mouseX - PLAYER_SIZE[0]/2
+				# 	mouseYchange = mouseYnew - mouseY - PLAYER_SIZE[1]/2
 #-----Global Methods-----
 def randSpdCalc():
 	speed = random.randint(7,17)
@@ -179,12 +178,12 @@ def randSpdCalc():
 		speed *= -1
 	return speed
 
-def collisionDetection(ball_data, smile_x, smile_y):
+def collisionDetection(ball_data, player_x, player_y):
 	ball_x = ball_data[0]
 	ball_y = ball_data[1]
-	smile_radius = SMILE_SIZE[0]
-	distance = math.sqrt((ball_x - smile_x)**2 + (ball_y - smile_y)**2)
-	if distance <= (smile_radius + BALL_RADIUS):
+	player_radius = PLAYER_SIZE[0]
+	distance = math.sqrt((ball_x - player_x)**2 + (ball_y - player_y)**2)
+	if distance <= (player_radius + BALL_RADIUS):
 		return True
 
 #-----Calling main and quitting pygame-----
