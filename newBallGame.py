@@ -45,7 +45,7 @@ class Ball():
 		self.posx += self.speedx
 		self.posy += self.speedy
 		#drawing ball after update
-		self.gameDisplay.blit(self.image, (self.posx,self.posy))
+		self.gameDisplay.blit(self.image, (self.posx + BALL_RADIUS, self.posy + BALL_RADIUS))
 		#self.pygame.draw.circle(self.gameDisplay, WHITE, (self.posx, self.posy), BALL_RADIUS)
 
 	def getPos(self):
