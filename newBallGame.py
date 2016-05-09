@@ -87,11 +87,13 @@ class Console():
 		self.pygame = pygame
 		self.bg_surface = bg_surface
 		self.gameDisplay = gameDisplay
+		
 		PLAYER = [self.pygame.image.load("./assets/player0.png"), # player.png from https://textfac.es
                           self.pygame.image.load("./assets/player1.png"),
                           self.pygame.image.load("./assets/player2.png"),
                           self.pygame.image.load("./assets/player3.png")]
                 PLAYER_SIZE = PLAYER[0].get_rect().size # creates rectangle around image and returns (width, height)
+
 
                 
 		self.mouseX = gameDisplay.get_width()
