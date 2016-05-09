@@ -9,8 +9,8 @@ STONE = None
 
 #-----Constants-----
 
-DISPLAY_WIDTH = 800
-DISPLAY_HEIGHT = 600
+DISPLAY_WIDTH = 640
+DISPLAY_HEIGHT = 800
 gameDisplay = pygame.display.set_mode((DISPLAY_WIDTH, DISPLAY_HEIGHT))
 
 BLACK = (0,0,0)
@@ -45,7 +45,7 @@ class Ball():
 		self.posx += self.speedx
 		self.posy += self.speedy
 		#drawing ball after update
-		self.gameDisplay.blit(self.image, (self.posx + BALL_RADIUS, self.posy + BALL_RADIUS))
+		self.gameDisplay.blit(self.image, (self.posx - BALL_RADIUS, self.posy - BALL_RADIUS))
 		#self.pygame.draw.circle(self.gameDisplay, WHITE, (self.posx, self.posy), BALL_RADIUS)
 
 	def getPos(self):
@@ -160,7 +160,7 @@ class Console():
 
 
 	def playerPosUpdate(self,x,y):
-		self.gameDisplay.blit(PLAYER[self.direction], (x,y))
+		self.gameDisplay.blit(PLAYER[self.direction], (x - PLAYER_SIZE[0]/2,y - PLAYER_SIZE[1]/2))
 
 	def gameOverText(self):
 		font = pygame.font.Font(None, 100)
@@ -192,7 +192,7 @@ def randSpdCalc():
 def collisionDetection(ball_data, player_x, player_y):
 	ball_x = ball_data[0]
 	ball_y = ball_data[1]
-	player_radius = PLAYER_SIZE[0]
+	player_radius = (PLAYER_SIZE[0] + PLAYER_SIZE[1]) / 4
 	distance = math.sqrt((ball_x - player_x)**2 + (ball_y - player_y)**2)
 	if distance <= (player_radius + BALL_RADIUS):
 		return True
