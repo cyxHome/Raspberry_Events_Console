@@ -223,9 +223,9 @@ if __name__ == '__main__':
     # Joystick Left
     GPIO.add_event_detect(5, GPIO.FALLING, callback=JS_Left_callback, bouncetime=300)
     # Joystick Top
-    GPIO.add_event_detect(6, GPIO.FALLING, callback=JS_Top_callback, bouncetime=300)
+    GPIO.add_event_detect(6, GPIO.FALLING, callback=JS_Bottom_callback, bouncetime=300)
     # Joystick Bottom
-    GPIO.add_event_detect(13, GPIO.FALLING, callback=JS_Bottom_callback, bouncetime=300)
+    GPIO.add_event_detect(13, GPIO.FALLING, callback=JS_Top_callback, bouncetime=300)
     # Joystick Right
     GPIO.add_event_detect(19, GPIO.FALLING, callback=JS_Right_callback, bouncetime=300)
     # White

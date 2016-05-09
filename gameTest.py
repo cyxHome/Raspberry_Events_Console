@@ -65,17 +65,21 @@ DISPLAY_WIDTH = 640
 DISPLAY_HEIGHT = 500
 USEREVENT = 0
 STEPY = 1
+STEP_GAME = 1
 STEPY_THRESHOLD = 10
+STEP_THRESHOLD_GAME = 1
 ########################     Global Variables     ########################
 screen = None
 up = True
 step_counter = 0
+step_counter_game = 0
 buffer_surface = None
 cur_event_idx = 0
 cur_img_idx = 0
 events_arr = []
 posX = 0
 posY = 100
+direction = -1
 # need_update_display_count
 need_update_display_count = 0
 # whether we are playing game or viewing events now
@@ -166,8 +170,10 @@ def JS_Left_callback(channel):
     global cur_event_idx
     global events_arr
     global need_update_display_count
+    global step_counter_game
+    global direction
     if is_game_mode:
-        console.move_left_event()
+        direction = 2
     else:
         length = len(events_arr)
         cur_event_idx += length - 1
@@ -179,21 +185,25 @@ def JS_Top_callback(channel):
     global posY
     global step_counter
     global up
+    global step_counter_game
+    global direction
     if is_game_mode:
-        console.move_up_event()
+        direction = 0
     else:
         up = True
         while GPIO.input(channel) == GPIO.LOW:
             print "Top is low..."
-            step_counter += STEPY 
+            step_counter += STEPY
 
 def JS_Bottom_callback(channel):
     print "falling edge detected on Joystick Bottom"
     global posY
     global step_counter
     global up
+    global step_counter_game
+    global direction
     if is_game_mode:
-        console.move_down_event()
+        direction = 1
     else:
         up = False
         while GPIO.input(channel) == GPIO.LOW:
@@ -205,8 +215,10 @@ def JS_Right_callback(channel):
     global cur_event_idx
     global events_arr
     global need_update_display_count
+    global step_counter_game
+    global direction
     if is_game_mode:
-        console.move_right_event()
+        direction = 3
     else:
         length = len(events_arr)
         cur_event_idx += 1
@@ -219,7 +231,7 @@ def BT_White_callback(channel):
     global console
     if not is_game_mode:
         is_game_mode = True
-        console = Console()
+        console = newBallGame.Console(pygame, buffer_surface, screen)
 
 def BT_Red_callback(channel):
     print "falling edge detected on Button Red, Game stop"
@@ -275,7 +287,16 @@ if __name__ == '__main__':
 
     	# wait for 3 continuous red button pressed to exit the program.
         while True:
-            if is_game_mode:
+            if is_game_mode and console is not None:
+                print "move smile " + str(direction)    
+                if direction == 0:
+                    console.move_up_event()
+                elif direction == 1:
+                    console.move_down_event()
+                elif direction == 2:
+                    console.move_left_event()
+                elif direction == 3:
+                    console.move_right_event()
                 console.update_all()
             else:
                 if step_counter >= STEPY_THRESHOLD:
