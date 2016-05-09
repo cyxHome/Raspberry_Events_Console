@@ -160,7 +160,7 @@ class Console():
 
 
 	def playerPosUpdate(self,x,y):
-		self.gameDisplay.blit(PLAYER[self.direction], (x - PLAYER_SIZE[0]/2,y - PLAYER_SIZE[1]/2))
+		self.gameDisplay.blit(PLAYER[self.direction], (x,y))
 
 	def gameOverText(self):
 		font = pygame.font.Font(None, 100)
