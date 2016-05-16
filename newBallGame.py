@@ -34,7 +34,7 @@ class Ball():
 		self.gameDisplay = gameDisplay
 		rand_num = random.randint(1, 3)
 		self.image = self.pygame.image.load("./assets/stone" + str(rand_num) + ".png") # player.png from https://textfac.es
-
+                
 	def update(self):
 		# if the ball is past the sreen, it reverses direction
 		if self.posx > DISPLAY_WIDTH or self.posx < 0:
@@ -96,8 +96,8 @@ class Console():
 
 
                 
-		self.mouseX = gameDisplay.get_width()
-		self.mouseY = gameDisplay.get_height()
+		self.mouseX = gameDisplay.get_width() / 2
+		self.mouseY = gameDisplay.get_height() / 2
 		# mouseXnew = 0
 		# mouseYnew = 0
 		self.mouseXchange = 0

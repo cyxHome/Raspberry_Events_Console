@@ -297,6 +297,9 @@ if __name__ == '__main__':
                     console.move_left_event(direction)
                 elif direction == 3:
                     console.move_right_event(direction)
+                if console.done:
+                    is_game_mode = False
+                    continue
                 console.update_all()
             else:
                 if step_counter >= STEPY_THRESHOLD:
