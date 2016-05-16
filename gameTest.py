@@ -168,6 +168,9 @@ def updateDisplayBuffer():
     addDescriptionToSurfaceMiddleAlign(buffer_surface, events_arr[cur_event_idx].getDescription(), next_y)
 
 def JS_Left_callback(channel):
+    global events_arr
+    if len(events_arr) == 0:
+        return
     print "falling edge detected on Joystick Left"
     global cur_event_idx
     global events_arr
@@ -183,6 +186,9 @@ def JS_Left_callback(channel):
         need_update_display_count += 1
 
 def JS_Top_callback(channel):
+    global events_arr
+    if len(events_arr) == 0:
+        return
     print "falling edge detected on Joystick Top"
     global posY
     global step_counter
@@ -198,6 +204,9 @@ def JS_Top_callback(channel):
             step_counter += STEPY
 
 def JS_Bottom_callback(channel):
+    global events_arr
+    if len(events_arr) == 0:
+        return
     print "falling edge detected on Joystick Bottom"
     global posY
     global step_counter
@@ -213,6 +222,9 @@ def JS_Bottom_callback(channel):
             step_counter += STEPY
 
 def JS_Right_callback(channel):
+    global events_arr
+    if len(events_arr) == 0:
+        return
     print "falling edge detected on Joystick Right"
     global cur_event_idx
     global events_arr
@@ -242,9 +254,26 @@ def BT_Red_callback(channel):
         is_game_mode = False
         console = None
 
-def refreshEventList():
+def keepRefreshingEventList():
+    global events_arr
+    print "refresh event"
     events_arr = []
     FirebaseConnector.packEventsToEventsData(events_arr, FIREBASE_ROOT_REF)
+    print events_arr
+    threading.Timer(31, keepRefreshingEventList).start()
+
+def keepChangingEvents():
+    global cur_event_idx
+    global need_update_display_count
+    if len(events_arr) == 0:
+        return
+    print "change event"
+    length = len(events_arr)
+    cur_event_idx += 1
+    cur_event_idx %= length
+    need_update_display_count += 1
+    threading.Timer(10, keepChangingEvents).start()
+
 
 if __name__ == '__main__':
 
@@ -285,16 +314,19 @@ if __name__ == '__main__':
     	# c = pygame.time.Clock() # create a clock object for timing
     	# pygame.time.set_timer(USEREVENT+1, 1000)  #1 second
     	# pygame.time.set_timer(USEREVENT+2, 5000)  #5 seconds
-        FirebaseConnector.packEventsToEventsData(events_arr, FIREBASE_ROOT_REF)
-        print events_arr
+        keepRefreshingEventList()
+        keepChangingEvents()
 
-        updateDisplayBuffer()
-        updateDisplay()
-
-        threading.Timer(10, refreshEventList).start()
+        if len(events_arr) > 0:
+            updateDisplayBuffer()
+            updateDisplay()
 
     	# wait for 3 continuous red button pressed to exit the program.
         while True:
+            if len(events_arr) == 0:
+                buffer_surface.fill((0,0,0))
+                updateDisplay()
+                time.sleep(5)
             if is_game_mode and console is not None:
                 print "move smile " + str(direction)    
                 if direction == 0:
