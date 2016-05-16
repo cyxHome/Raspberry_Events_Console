@@ -12,6 +12,8 @@ import subprocess
 import requests
 import textwrap
 import newBallGame
+import threading
+import time
 
 # http://pygame.org/wiki/TextWrapping?parent=
 from itertools import chain
@@ -240,6 +242,10 @@ def BT_Red_callback(channel):
         is_game_mode = False
         console = None
 
+def refreshEventList():
+    events_arr = []
+    FirebaseConnector.packEventsToEventsData(events_arr, FIREBASE_ROOT_REF)
+
 if __name__ == '__main__':
 
     print "Welcome to use raspberry pi event visualizor"
@@ -284,6 +290,8 @@ if __name__ == '__main__':
 
         updateDisplayBuffer()
         updateDisplay()
+
+        threading.Timer(10, refreshEventList).start()
 
     	# wait for 3 continuous red button pressed to exit the program.
         while True:
